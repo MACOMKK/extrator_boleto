@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extrator de Boleto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #000000;
+      --surface: #0b0b0b;
+      --surface2: #141414;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.14);
+      --accent: #e2211e;
+      --accent-dim: rgba(226, 33, 30, 0.14);
+      --accent-glow: rgba(226, 33, 30, 0.3);
+      --text: #f0f0f0;
+      --muted: #6e6e7a;
+      --muted2: #9999a8;
+      --danger: #ff6b6b;
+      --success: #6adf9a;
+      --mono: 'DM Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--display);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 96px;
+      height: 96px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .header-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+      gap: 0;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: var(--muted2);
+      font-weight: 400;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      max-width: 620px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+
+    .card-inner {
+      padding: 1.75rem;
+    }
+
+    /* ── TEXTAREA ── */
+    .field-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-label::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--text);
+      resize: none;
+      line-height: 1.6;
+      outline: none;
+      transition: border-color 0.2s;
+      min-height: 96px;
+    }
+
+    textarea::placeholder {
+      color: var(--muted);
+    }
+
+    textarea:focus {
+      border-color: var(--border2);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    /* ── ACTIONS ── */
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      font-family: var(--display);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 11px 20px;
+      transition: all 0.15s ease;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: #c91c19;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted2);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    /* ── RESULT ── */
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .result-status {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .result-status.has-result {
+      color: var(--success);
+    }
+
+    .result-status.has-error {
+      color: var(--danger);
+    }
+
+    .char-count {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .result-value {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      word-break: break-all;
+      line-height: 1.7;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      transition: border-color 0.3s;
+    }
+
+    .result-value.empty {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .result-value.glow {
+      border-color: rgba(226, 33, 30, 0.35);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .copy-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+      gap: 8px;
+    }
+
+    .btn-copy {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted2);
+      cursor: pointer;
+      padding: 7px 14px;
+      transition: all 0.15s;
+    }
+
+    .btn-copy:hover {
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .btn-copy.copied {
+      color: var(--success);
+      border-color: rgba(106, 223, 154, 0.3);
+    }
+
+    /* ── HISTORY ── */
+    .history-section {
+      width: 100%;
+      max-width: 620px;
+      margin-top: 1.5rem;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    .history-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .history-item:hover {
+      border-color: var(--border2);
+    }
+
+    .history-num {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted2);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(.34, 1.56, .64, 1);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      header {
+        padding: 1rem 1.25rem;
+      }
+
+      .header-badge {
+        display: none;
+      }
+
+      main {
+        padding: 2rem 1rem;
+      }
+
+      .actions {
+        flex-wrap: wrap;
+      }
+
+      .btn-ghost {
+        flex: 1;
+      }
+
+      .result-value {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <img
+          src="https://www.mitmacom.com.br/_next/image?url=https%3A%2F%2Fnext-files-bucket.s3.us-east-1.amazonaws.com%2Fsite%2F295%2Fd5368891e7fc7ea3d26b1760448206.png&w=384&q=75"
+          alt="Logo MACOM" />
+      </div>
+      <span class="logo-text">Extrator<span>Boleto</span></span>
+    </div>
+    <span class="header-badge">v1.0</span>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="card-inner">
+
+        <div class="field-label">Linha digitável</div>
+        <textarea id="input" placeholder="Ex: 34191.09008 12806.898529 43071.320006 1 13910000011990"
+          rows="3"></textarea>
+
+        <div class="actions">
+          <button class="btn btn-primary" onclick="extrair()">Extrair números</button>
+          <button class="btn btn-ghost" onclick="limpar()">Limpar</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-header">
+          <span class="result-status" id="status">aguardando</span>
+          <span class="char-count" id="char-count">— dígitos</span>
+        </div>
+
+        <div class="result-value empty" id="output">
+          O resultado aparece aqui...
+        </div>
+
+        <div class="copy-row" id="copy-row" style="display:none">
+          <button class="btn-copy" id="copybtn" onclick="copiar()">[ copiar ]</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="history-section" id="history-section" style="display:none">
+      <div class="history-title">Histórico da sessão</div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </main>
+
+  <footer>
+    feito para agilizar cobranças · nenhum dado é salvo ou enviado
+  </footer>
+
+  <div class="toast" id="toast">
+    <div class="toast-dot"></div>
+    <span id="toast-msg">Copiado!</span>
+  </div>
+
+  <script>
+    const history = [];
+
+    function extrair() {
+      const raw = document.getElementById('input').value.trim();
+      const out = document.getElementById('output');
+      const status = document.getElementById('status');
+      const count = document.getElementById('char-count');
+      const copyRow = document.getElementById('copy-row');
+
+      if (!raw) {
+        status.textContent = 'campo vazio';
+        status.className = 'result-status has-error';
+        out.textContent = 'Cole uma linha digitável primeiro.';
+        out.className = 'result-value empty';
+        copyRow.style.display = 'none';
+        count.textContent = '— dígitos';
+        return;
+      }
+
+      const limpo = raw.replace(/\D/g, '');
+
+      if (!limpo) {
+        status.textContent = 'sem números';
+        status.className = 'result-status has-error';
+        out.textContent = 'Nenhum número encontrado na entrada.';
+        out.className = 'result-value empty';
+        copyRow.style.display = 'none';
+        count.textContent = '0 dígitos';
+        return;
+      }
+
+      out.textContent = limpo;
+      out.className = 'result-value glow';
+      status.textContent = 'extraído';
+      status.className = 'result-status has-result';
+      count.textContent = limpo.length + ' dígitos';
+      copyRow.style.display = 'flex';
+
+      addHistory(limpo);
+
+      setTimeout(() => out.classList.remove('glow'), 1200);
+    }
+
+    function limpar() {
+      document.getElementById('input').value = '';
+      document.getElementById('output').textContent = 'O resultado aparece aqui...';
+      document.getElementById('output').className = 'result-value empty';
+      document.getElementById('status').textContent = 'aguardando';
+      document.getElementById('status').className = 'result-status';
+      document.getElementById('char-count').textContent = '— dígitos';
+      document.getElementById('copy-row').style.display = 'none';
+      document.getElementById('input').focus();
+    }
+
+    function copiar() {
+      const texto = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(texto).then(() => {
+        const btn = document.getElementById('copybtn');
+        btn.textContent = '[ copiado! ]';
+        btn.classList.add('copied');
+        showToast('Copiado para a área de transferência!');
+        setTimeout(() => {
+          btn.textContent = '[ copiar ]';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function addHistory(num) {
+      if (history.includes(num)) return;
+      history.unshift(num);
+      if (history.length > 5) history.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const sec = document.getElementById('history-section');
+      const list = document.getElementById('history-list');
+      if (history.length === 0) { sec.style.display = 'none'; return; }
+      sec.style.display = 'block';
+      list.innerHTML = '';
+      history.forEach((num, i) => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.title = 'Clique para copiar';
+        item.innerHTML = `
+        <span class="history-num">${num}</span>
+        <span class="history-tag">${num.length} dígitos</span>
+      `;
+        item.onclick = () => {
+          navigator.clipboard.writeText(num).then(() => showToast('Copiado do histórico!'));
+        };
+        list.appendChild(item);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    document.getElementById('input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); extrair(); }
+    });
+  </script>
+</body>
+
+</html>
