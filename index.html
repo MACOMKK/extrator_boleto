@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -7,7 +7,7 @@
   <title>Extrator de Boleto - MACOM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet" />
   <style>
     *,
@@ -19,27 +19,32 @@
     }
 
     :root {
-      --bg: #000000;
-      --surface: #0b0b0b;
-      --surface2: #141414;
-      --border: rgba(255, 255, 255, 0.07);
-      --border2: rgba(255, 255, 255, 0.14);
-      --accent: #e2211e;
-      --accent-dim: rgba(226, 33, 30, 0.14);
-      --accent-glow: rgba(226, 33, 30, 0.3);
-      --text: #f0f0f0;
-      --muted: #6e6e7a;
-      --muted2: #9999a8;
-      --danger: #ff6b6b;
-      --success: #6adf9a;
+      --bg: #0f1115;
+      --bg-2: #181c23;
+      --surface: #1d222b;
+      --surface2: #262c36;
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.2);
+      --accent: #d61920;
+      --accent-strong: #b8141a;
+      --accent-dim: rgba(214, 25, 32, 0.18);
+      --accent-glow: rgba(214, 25, 32, 0.34);
+      --text: #f4f6fa;
+      --muted: #99a3b3;
+      --muted2: #c0c8d3;
+      --danger: #ff7f86;
+      --success: #7fe2b0;
       --mono: 'DM Mono', monospace;
-      --display: 'Syne', sans-serif;
+      --display: 'Manrope', sans-serif;
     }
 
     html,
     body {
       height: 100%;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(214, 25, 32, 0.22), transparent 36%),
+        radial-gradient(circle at 90% 100%, rgba(255, 255, 255, 0.08), transparent 32%),
+        linear-gradient(160deg, var(--bg), var(--bg-2));
       color: var(--text);
       font-family: var(--display);
       -webkit-font-smoothing: antialiased;
@@ -51,13 +56,14 @@
       min-height: 100vh;
     }
 
-    /* ── HEADER ── */
     header {
       padding: 0.75rem 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border);
+      background: rgba(16, 18, 24, 0.6);
+      backdrop-filter: blur(7px);
     }
 
     .logo {
@@ -67,13 +73,14 @@
     }
 
     .logo-icon {
-      width: 96px;
-      height: 96px;
+      width: 50px;
+      height: 50px;
       border-radius: 8px;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: transparent;
     }
 
     .logo-icon img {
@@ -84,8 +91,8 @@
 
     .logo-text {
       font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
+      font-weight: 800;
+      letter-spacing: -0.1px;
     }
 
     .logo-text span {
@@ -95,13 +102,13 @@
     .header-badge {
       font-family: var(--mono);
       font-size: 11px;
-      color: var(--muted);
+      color: var(--muted2);
       border: 1px solid var(--border2);
       padding: 4px 10px;
       border-radius: 100px;
+      background: rgba(255, 255, 255, 0.04);
     }
 
-    /* ── MAIN ── */
     main {
       flex: 1;
       display: flex;
@@ -114,16 +121,16 @@
 
     .hero {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.4rem;
       animation: fadeUp 0.5s ease both;
     }
 
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-size: clamp(1.35rem, 2.2vw, 2rem);
       font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -1.5px;
-      margin-bottom: 0.75rem;
+      line-height: 1.2;
+      letter-spacing: -0.2px;
+      margin-bottom: 0.45rem;
     }
 
     .hero h1 em {
@@ -132,30 +139,30 @@
     }
 
     .hero p {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--muted2);
-      font-weight: 400;
-      max-width: 420px;
+      font-weight: 500;
+      max-width: 520px;
       margin: 0 auto;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
-    /* ── CARD ── */
     .card {
       width: 100%;
       max-width: 620px;
-      background: var(--surface);
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
       border: 1px solid var(--border);
       border-radius: 20px;
       overflow: hidden;
       animation: fadeUp 0.5s 0.1s ease both;
+      box-shadow: 0 22px 42px rgba(0, 0, 0, 0.3);
     }
 
     .card-inner {
       padding: 1.75rem;
+      background: color-mix(in srgb, var(--surface) 92%, black 8%);
     }
 
-    /* ── TEXTAREA ── */
     .field-label {
       font-family: var(--mono);
       font-size: 11px;
@@ -202,7 +209,6 @@
       box-shadow: 0 0 0 3px var(--accent-dim);
     }
 
-    /* ── ACTIONS ── */
     .actions {
       display: flex;
       gap: 8px;
@@ -222,15 +228,14 @@
     }
 
     .btn-primary {
-      background: var(--accent);
+      background: linear-gradient(180deg, var(--accent), var(--accent-strong));
       color: #ffffff;
       flex: 1;
     }
 
     .btn-primary:hover {
-      background: #c91c19;
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px var(--accent-glow);
+      box-shadow: 0 8px 24px var(--accent-glow);
     }
 
     .btn-primary:active {
@@ -248,14 +253,12 @@
       color: var(--text);
     }
 
-    /* ── DIVIDER ── */
     .divider {
       height: 1px;
       background: var(--border);
       margin: 1.5rem 0;
     }
 
-    /* ── RESULT ── */
     .result-header {
       display: flex;
       align-items: center;
@@ -310,7 +313,7 @@
     }
 
     .result-value.glow {
-      border-color: rgba(226, 33, 30, 0.35);
+      border-color: rgba(214, 25, 32, 0.45);
       box-shadow: 0 0 0 3px var(--accent-dim);
     }
 
@@ -340,10 +343,9 @@
 
     .btn-copy.copied {
       color: var(--success);
-      border-color: rgba(106, 223, 154, 0.3);
+      border-color: rgba(127, 226, 176, 0.35);
     }
 
-    /* ── HISTORY ── */
     .history-section {
       width: 100%;
       max-width: 620px;
@@ -404,7 +406,6 @@
       flex-shrink: 0;
     }
 
-    /* ── FOOTER ── */
     footer {
       text-align: center;
       padding: 1.5rem;
@@ -412,9 +413,9 @@
       font-size: 11px;
       color: var(--muted);
       border-top: 1px solid var(--border);
+      background: rgba(15, 17, 21, 0.75);
     }
 
-    /* ── TOAST ── */
     .toast {
       position: fixed;
       bottom: 1.5rem;
@@ -447,7 +448,6 @@
       background: var(--success);
     }
 
-    /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       from {
         opacity: 0;
@@ -460,7 +460,6 @@
       }
     }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 480px) {
       header {
         padding: 1rem 1.25rem;
@@ -485,6 +484,11 @@
       .result-value {
         font-size: 14px;
       }
+
+      .hero h1 {
+        font-size: 1.35rem;
+        line-height: 1.2;
+      }
     }
   </style>
 </head>
@@ -495,15 +499,20 @@
     <div class="logo">
       <div class="logo-icon">
         <img
-          src="https://www.mitmacom.com.br/_next/image?url=https%3A%2F%2Fnext-files-bucket.s3.us-east-1.amazonaws.com%2Fsite%2F295%2Fd5368891e7fc7ea3d26b1760448206.png&w=384&q=75"
+          src="https://res.cloudinary.com/drevbr5eq/image/upload/v1777603989/logo_vermelha_e2aob2.png"
           alt="Logo MACOM" />
       </div>
       <span class="logo-text">Extrator<span>Boleto</span></span>
     </div>
-    <span class="header-badge">v1.0</span>
+    <span class="header-badge">v1.1</span>
   </header>
 
   <main>
+    <div class="hero">
+      <h1>Extração rápida com padrão <em>MACOM</em></h1>
+      <p>Use a linha digitável e gere apenas os números em segundos.</p>
+    </div>
+
     <div class="card">
       <div class="card-inner">
 
@@ -520,7 +529,7 @@
 
         <div class="result-header">
           <span class="result-status" id="status">aguardando</span>
-          <span class="char-count" id="char-count">— dígitos</span>
+          <span class="char-count" id="char-count">- dígitos</span>
         </div>
 
         <div class="result-value empty" id="output">
@@ -565,7 +574,7 @@
         out.textContent = 'Cole uma linha digitável primeiro.';
         out.className = 'result-value empty';
         copyRow.style.display = 'none';
-        count.textContent = '— dígitos';
+        count.textContent = '- dígitos';
         return;
       }
 
@@ -599,7 +608,7 @@
       document.getElementById('output').className = 'result-value empty';
       document.getElementById('status').textContent = 'aguardando';
       document.getElementById('status').className = 'result-status';
-      document.getElementById('char-count').textContent = '— dígitos';
+      document.getElementById('char-count').textContent = '- dígitos';
       document.getElementById('copy-row').style.display = 'none';
       document.getElementById('input').focus();
     }
@@ -631,7 +640,7 @@
       if (history.length === 0) { sec.style.display = 'none'; return; }
       sec.style.display = 'block';
       list.innerHTML = '';
-      history.forEach((num, i) => {
+      history.forEach((num) => {
         const item = document.createElement('div');
         item.className = 'history-item';
         item.title = 'Clique para copiar';
