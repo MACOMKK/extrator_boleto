@@ -111,6 +111,71 @@
       background: rgba(255, 255, 255, 0.04);
     }
 
+    .side-support {
+      position: fixed;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .support-panel {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(29, 34, 43, 0.88);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.24);
+    }
+
+    .support-tag {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      padding: 0.8rem 0.55rem;
+      background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .support-links {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1px;
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: width 0.22s ease, opacity 0.18s ease;
+    }
+
+    .side-support:hover .support-links,
+    .side-support:focus-within .support-links {
+      width: 190px;
+      opacity: 1;
+    }
+
+    .support-links a {
+      padding: 0.78rem 0.95rem;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--muted2);
+      font-family: var(--mono);
+      font-size: 11px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .support-links a:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
     main {
       flex: 1;
       display: flex;
@@ -483,6 +548,33 @@
         flex: 1;
       }
 
+      .side-support {
+        top: auto;
+        bottom: 16px;
+        right: 16px;
+        transform: none;
+      }
+
+      .support-panel {
+        border-radius: 14px;
+      }
+
+      .support-tag {
+        writing-mode: initial;
+        transform: none;
+        padding: 0.7rem 0.9rem;
+      }
+
+      .support-links {
+        width: 154px;
+        opacity: 1;
+      }
+
+      .support-links a {
+        padding: 0.7rem 0.8rem;
+        font-size: 10px;
+      }
+
       .result-value {
         font-size: 14px;
       }
@@ -508,6 +600,16 @@
     </div>
     <span class="header-badge">v1.1</span>
   </header>
+
+  <div class="side-support">
+    <div class="support-panel">
+      <div class="support-tag">Suporte</div>
+      <div class="support-links">
+        <a href="mailto:kevinsoares@jcmempresas.com.br?subject=Suporte%20-%20Extrator%20de%20Boleto">E-mail</a>
+        <a href="https://wa.me/55919183927903" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      </div>
+    </div>
+  </div>
 
   <main>
     <div class="hero">
