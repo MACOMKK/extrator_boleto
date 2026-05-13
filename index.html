@@ -377,6 +377,12 @@
       display: block;
     }
 
+    .preview canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
     .actions {
       display: flex;
       gap: 8px;
@@ -888,10 +894,10 @@
         </section>
 
         <section class="panel" id="ocr-panel">
-          <div class="field-label">Imagem do boleto</div>
+          <div class="field-label">Arquivo do boleto</div>
 
           <div class="upload-box">
-            <input class="upload-input" id="image-input" type="file" accept="image/*" />
+            <input class="upload-input" id="image-input" type="file" accept="image/*,.pdf,application/pdf" />
 
             <div class="upload-meta">
               <span id="file-name">nenhum arquivo selecionado</span>
@@ -899,19 +905,19 @@
             </div>
 
             <div class="preview" id="preview">
-              Selecione uma imagem para iniciar a leitura.
+              Selecione uma imagem ou PDF para iniciar a leitura.
             </div>
           </div>
 
           <div class="actions">
-            <button class="btn btn-primary" id="extract-btn" onclick="extrairOCR()">Extrair da imagem</button>
+            <button class="btn btn-primary" id="extract-btn" onclick="extrairOCR()">Extrair do arquivo</button>
             <button class="btn btn-ghost" onclick="limparOCR()">Limpar</button>
           </div>
 
           <div class="divider"></div>
 
           <div class="result-header">
-            <span class="ocr-status" id="ocr-status">aguardando imagem</span>
+            <span class="ocr-status" id="ocr-status">aguardando arquivo</span>
             <span class="char-count" id="ocr-meta">pronto para leitura</span>
           </div>
 
@@ -919,7 +925,7 @@
             Os dados identificados serão abertos no modal para avaliação.
           </div>
 
-          <p class="ocr-hint">A leitura é feita no navegador. Imagens mais nítidas, bem cortadas e com bom contraste costumam gerar resultados melhores.</p>
+          <p class="ocr-hint">A leitura é feita no navegador. Você pode enviar imagem ou PDF. Arquivos mais nítidos e bem cortados costumam gerar resultados melhores.</p>
         </section>
       </div>
     </div>
@@ -960,11 +966,13 @@
     <span id="toast-msg">Copiado!</span>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
     const history = [];
     let selectedFile = null;
     let previewUrl = '';
+    let pdfCanvas = null;
 
     const imageInput = document.getElementById('image-input');
     const preview = document.getElementById('preview');
@@ -976,6 +984,10 @@
     const extractBtn = document.getElementById('extract-btn');
 
     imageInput.addEventListener('change', handleFileSelect);
+
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
 
     function setMode(mode) {
       const manualActive = mode === 'manual';
@@ -1050,9 +1062,10 @@
       });
     }
 
-    function handleFileSelect(event) {
+    async function handleFileSelect(event) {
       const file = event.target.files[0];
       selectedFile = file || null;
+      pdfCanvas = null;
 
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
@@ -1064,29 +1077,51 @@
         return;
       }
 
-      previewUrl = URL.createObjectURL(selectedFile);
       fileName.textContent = selectedFile.name;
       fileSize.textContent = formatFileSize(selectedFile.size);
-      preview.innerHTML = '<img src="' + previewUrl + '" alt="Pré-visualização da imagem enviada">';
-      ocrStatus.textContent = 'imagem pronta';
-      ocrStatus.className = 'ocr-status';
-      ocrMeta.textContent = 'arquivo carregado';
-      ocrOutput.textContent = 'Imagem carregada. Clique em "Extrair da imagem" para analisar.';
       ocrOutput.className = 'result-value empty';
+
+      try {
+        if (isPdfFile(selectedFile)) {
+          preview.innerHTML = 'Gerando prévia do PDF...';
+          pdfCanvas = await renderPdfPage(selectedFile, 1.5);
+          preview.innerHTML = '';
+          preview.appendChild(pdfCanvas);
+          ocrStatus.textContent = 'pdf pronto';
+          ocrStatus.className = 'ocr-status';
+          ocrMeta.textContent = 'primeira página carregada';
+          ocrOutput.textContent = 'PDF carregado. Clique em "Extrair do arquivo" para analisar.';
+        } else {
+          previewUrl = URL.createObjectURL(selectedFile);
+          preview.innerHTML = '<img src="' + previewUrl + '" alt="Pré-visualização do arquivo enviado">';
+          ocrStatus.textContent = 'imagem pronta';
+          ocrStatus.className = 'ocr-status';
+          ocrMeta.textContent = 'arquivo carregado';
+          ocrOutput.textContent = 'Imagem carregada. Clique em "Extrair do arquivo" para analisar.';
+        }
+      } catch (error) {
+        selectedFile = null;
+        pdfCanvas = null;
+        preview.textContent = 'Não foi possível gerar a prévia do arquivo.';
+        ocrStatus.textContent = 'arquivo inválido';
+        ocrStatus.className = 'ocr-status has-error';
+        ocrMeta.textContent = 'tente outro arquivo';
+        ocrOutput.textContent = error.message || 'Não foi possível preparar o arquivo.';
+      }
     }
 
     async function extrairOCR() {
       if (!selectedFile) {
-        ocrStatus.textContent = 'imagem ausente';
+        ocrStatus.textContent = 'arquivo ausente';
         ocrStatus.className = 'ocr-status has-error';
         ocrMeta.textContent = 'selecione um arquivo';
-        ocrOutput.textContent = 'Selecione uma imagem antes de iniciar a leitura.';
+        ocrOutput.textContent = 'Selecione uma imagem ou PDF antes de iniciar a leitura.';
         ocrOutput.className = 'result-value empty';
         return;
       }
 
-      if (!window.Tesseract) {
-        ocrStatus.textContent = 'ocr indisponível';
+      if (!window.Tesseract || (isPdfFile(selectedFile) && !window.pdfjsLib)) {
+        ocrStatus.textContent = 'leitura indisponível';
         ocrStatus.className = 'ocr-status has-error';
         ocrMeta.textContent = 'falha ao carregar biblioteca';
         ocrOutput.textContent = 'A biblioteca de leitura não foi carregada.';
@@ -1095,15 +1130,19 @@
       }
 
       extractBtn.disabled = true;
-      extractBtn.textContent = 'Lendo imagem...';
+      extractBtn.textContent = 'Lendo arquivo...';
       ocrStatus.textContent = 'processando';
       ocrStatus.className = 'ocr-status';
       ocrMeta.textContent = 'isso pode levar alguns segundos';
-      ocrOutput.textContent = 'Processando texto da imagem...';
+      ocrOutput.textContent = 'Processando texto do arquivo...';
       ocrOutput.className = 'result-value empty';
 
       try {
-        const result = await Tesseract.recognize(selectedFile, 'por+eng', {
+        const source = isPdfFile(selectedFile)
+          ? (pdfCanvas || await renderPdfPage(selectedFile, 2))
+          : selectedFile;
+
+        const result = await Tesseract.recognize(source, 'por+eng', {
           logger: ({ status, progress }) => {
             if (status === 'recognizing text') {
               ocrMeta.textContent = Math.round(progress * 100) + '% concluído';
@@ -1130,18 +1169,19 @@
       } catch (error) {
         ocrStatus.textContent = 'falha na leitura';
         ocrStatus.className = 'ocr-status has-error';
-        ocrMeta.textContent = 'tente outra imagem';
-        ocrOutput.textContent = error.message || 'Não foi possível concluir a leitura da imagem.';
+        ocrMeta.textContent = 'tente outro arquivo';
+        ocrOutput.textContent = error.message || 'Não foi possível concluir a leitura do arquivo.';
         ocrOutput.className = 'result-value empty';
       } finally {
         extractBtn.disabled = false;
-        extractBtn.textContent = 'Extrair da imagem';
+        extractBtn.textContent = 'Extrair do arquivo';
       }
     }
 
     function limparOCR() {
       imageInput.value = '';
       selectedFile = null;
+      pdfCanvas = null;
 
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
@@ -1155,12 +1195,39 @@
     function resetOCRPreview() {
       fileName.textContent = 'nenhum arquivo selecionado';
       fileSize.textContent = '-';
-      preview.textContent = 'Selecione uma imagem para iniciar a leitura.';
-      ocrStatus.textContent = 'aguardando imagem';
+      preview.textContent = 'Selecione uma imagem ou PDF para iniciar a leitura.';
+      ocrStatus.textContent = 'aguardando arquivo';
       ocrStatus.className = 'ocr-status';
       ocrMeta.textContent = 'pronto para leitura';
       ocrOutput.textContent = 'Os dados identificados serão abertos no modal para avaliação.';
       ocrOutput.className = 'result-value empty';
+    }
+
+    function isPdfFile(file) {
+      return file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
+    }
+
+    async function renderPdfPage(file, scale) {
+      if (!window.pdfjsLib) {
+        throw new Error('A biblioteca de PDF não foi carregada.');
+      }
+
+      const buffer = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: scale || 1.5 });
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d', { alpha: false });
+
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+
+      await page.render({
+        canvasContext: context,
+        viewport
+      }).promise;
+
+      return canvas;
     }
 
     function mapExtractedData(text) {
